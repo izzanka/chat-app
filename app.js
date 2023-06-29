@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 import bcrypt from 'bcrypt'
 import { initializeApp } from "firebase/app"
-import { getFirestore, collection, addDoc, query, where, getDocs, Timestamp, limit, getDoc } from "firebase/firestore"
+import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeZoO8FXUTrwyGqVdHWyZmhCzMslLWbk",
@@ -61,7 +61,6 @@ app.post('/api/register', async(req, res) => {
             fullname: fullname,
             username: username,
             password: bcrypt.hashSync(password, 10),
-            created_at: Timestamp.now(),
         })
 
         return res.status(200).json({
@@ -71,7 +70,6 @@ app.post('/api/register', async(req, res) => {
                 id: docRef.id,
                 fullname: fullname,
                 username: username,
-                created_at: Timestamp.now()
             }
         })
 
@@ -114,13 +112,13 @@ app.post('/api/login', async(req,res) => {
         }
 
         querySnapshot.forEach((doc) => {
-            bcrypt.compare(password, doc.data().password, (err, result) => {
 
+            bcrypt.compare(password, doc.data().password, (err, result) => {
                 if(result != true)
                 {
                     return res.status(401).json({
                         success: false,
-                        message: "Password is wrong."
+                        message: "Username or password is wrong."
                     })
                 }
 
@@ -134,8 +132,7 @@ app.post('/api/login', async(req,res) => {
                         created_at: doc.data().created_at
                     }
                 })
-
-            })
+            })  
         })
         
     } catch (error) {
@@ -163,7 +160,7 @@ app.post('/api/user', async(req,res) => {
             })
         }
 
-        const usersRef = collection(db, "users", user_id)
+        const usersRef = doc(db, "users", user_id)
         const docUser = await getDoc(usersRef)
 
         if(docUser.empty)
@@ -181,7 +178,6 @@ app.post('/api/user', async(req,res) => {
                 id: docUser.id,
                 fullname: docUser.data().fullname,
                 username: docUser.data().username,
-                created_at: docUser.data().created_at
             }
         })
         
