@@ -129,7 +129,6 @@ app.post('/api/login', async(req,res) => {
                         id: doc.id,
                         fullname: doc.data().fullname,
                         username: doc.data().username,
-                        created_at: doc.data().created_at
                     }
                 })
             })  
