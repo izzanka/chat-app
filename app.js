@@ -1,9 +1,9 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import bcrypt from 'bcrypt'
+// import bcrypt from 'bcrypt'
 import { initializeApp } from "firebase/app"
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc } from "firebase/firestore"
+import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeZoO8FXUTrwyGqVdHWyZmhCzMslLWbk",
@@ -16,7 +16,7 @@ const firebaseConfig = {
 }
 
 const app = express()
-const port = 3030
+const port = 3000
 const fb = initializeApp(firebaseConfig);
 const db = getFirestore(fb)
 
@@ -57,10 +57,12 @@ app.post('/api/register', async(req, res) => {
             })
         }
 
+        // let passwordHash = bcrypt.hashSync(password, 10)
+
         const docRef = await addDoc(usersRef, {
             fullname: fullname,
             username: username,
-            password: bcrypt.hashSync(password, 10),
+            password: password,
         })
 
         return res.status(200).json({
@@ -113,25 +115,25 @@ app.post('/api/login', async(req,res) => {
 
         querySnapshot.forEach((doc) => {
 
-            bcrypt.compare(password, doc.data().password, (err, result) => {
-                if(result != true)
-                {
-                    return res.status(401).json({
-                        success: false,
-                        message: "Username or password is wrong."
-                    })
-                }
-
-                return res.status(200).json({
-                    success: true,
-                    message: "Login success.",
-                    data: {
-                        id: doc.id,
-                        fullname: doc.data().fullname,
-                        username: doc.data().username,
-                    }
+            // bcrypt.compare(password, doc.data().password, (err, result) => {
+            if(password != doc.data().password)
+            {
+                return res.status(401).json({
+                    success: false,
+                    message: "Username or password is wrong."
                 })
-            })  
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: "Login success.",
+                data: {
+                    id: doc.id,
+                    fullname: doc.data().fullname,
+                    username: doc.data().username,
+                }
+            })
+            
         })
         
     } catch (error) {
@@ -161,6 +163,18 @@ app.post('/api/user', async(req,res) => {
 
         const usersRef = doc(db, "users", user_id)
         const docUser = await getDoc(usersRef)
+        const querySnapshot = await getDocs(collection(db, "users", user_id, "friends"))
+        
+        let friends = []
+
+        // if(!querySnapshot.empty)
+        // {
+            querySnapshot.forEach((doc) => {
+                friends.push({
+                    ...doc.data()
+                })
+            })
+        //}
 
         if(docUser.empty)
         {
@@ -177,6 +191,7 @@ app.post('/api/user', async(req,res) => {
                 id: docUser.id,
                 fullname: docUser.data().fullname,
                 username: docUser.data().username,
+                friends: friends
             }
         })
         
@@ -187,6 +202,73 @@ app.post('/api/user', async(req,res) => {
             message: error.message,
         })
 
+    }
+
+})
+
+//edit user
+app.put('/api/user', async(req,res) => {
+
+    try {
+
+        let user_id = req.body.user_id
+        let fullname = req.body.fullname
+        let username = req.body.username
+
+        const usersRef = collection(db, "users")
+        const q = query(usersRef, where("username", "==", username))
+        const querySnapshot = await getDocs(q)
+
+        if(!querySnapshot.empty)
+        {
+            return res.status(403).json({
+                success: false,
+                message: "Username already registered.",
+            })
+        }
+
+        const userRef = doc(db, "users", user_id)
+
+        if(userRef.empty)
+        {
+            return res.status(404).json({
+                success: false,
+                message: "User not found.",
+            })
+        }
+
+        await updateDoc(userRef, {
+            fullname: fullname,
+            username: username
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Update user success.",
+        })
+        
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+
+    }
+})
+
+//add freind
+app.post('/api/user/freinds', async(req,res) => {
+
+    try {
+
+        let user_id = req.body.user_id
+        let freind_id = req.body.freind_id
+        let freind_fullname = req.body.freind_fullname
+        let freind_username = req.body.freind_username
+        
+    } catch (error) {
+        
     }
 
 })
