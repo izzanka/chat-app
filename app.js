@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 // import bcrypt from 'bcrypt'
 import { initializeApp } from "firebase/app"
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc } from "firebase/firestore"
+import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc, QuerySnapshot } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeZoO8FXUTrwyGqVdHWyZmhCzMslLWbk",
@@ -257,15 +257,52 @@ app.put('/api/user', async(req,res) => {
     }
 })
 
-//add freind
-app.post('/api/user/freinds', async(req,res) => {
+//get all users
+app.post('/api/users', async(req,res) => {
+
+    try {
+
+        let username = req.body.username
+        
+        const usersRef = collection(db, "users")
+        const q = query(usersRef, where("username", "!=", username))
+        const querySnapshot = await getDocs(q)
+
+        let users = []
+
+        querySnapshot.forEach((doc) => {
+            users.push({
+                ...doc.data()
+            })
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Get all users succes.",
+            data: users
+        })
+
+        
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+
+})
+
+
+//add friend
+app.post('/api/user/friends', async(req,res) => {
 
     try {
 
         let user_id = req.body.user_id
-        let freind_id = req.body.freind_id
-        let freind_fullname = req.body.freind_fullname
-        let freind_username = req.body.freind_username
+        let friend_id = req.body.friend_id
+        let friend_fullname = req.body.friend_fullname
+        let friend_username = req.body.friend_username
         
     } catch (error) {
         
