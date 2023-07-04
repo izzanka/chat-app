@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import cors from 'cors'
 // import bcrypt from 'bcrypt'
 import { initializeApp } from "firebase/app"
-import { getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc, QuerySnapshot } from "firebase/firestore"
+import { deleteDoc, getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc, QuerySnapshot } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyBNeZoO8FXUTrwyGqVdHWyZmhCzMslLWbk",
@@ -167,14 +167,11 @@ app.post('/api/user', async(req,res) => {
         
         let friends = []
 
-        // if(!querySnapshot.empty)
-        // {
-            querySnapshot.forEach((doc) => {
-                friends.push({
-                    ...doc.data()
-                })
+        querySnapshot.forEach((doc) => {
+            friends.push({
+                ...doc.data()
             })
-        //}
+        })
 
         if(docUser.empty)
         {
@@ -214,6 +211,14 @@ app.put('/api/user', async(req,res) => {
         let user_id = req.body.user_id
         let fullname = req.body.fullname
         let username = req.body.username
+
+        if(!user_id || !fullname || !username)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "All field is required."
+            })
+        }
 
         const usersRef = collection(db, "users")
         const q = query(usersRef, where("username", "==", username))
@@ -263,6 +268,14 @@ app.post('/api/users', async(req,res) => {
     try {
 
         let username = req.body.username
+
+        if(!username)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "Username is required."
+            })
+        }
         
         const usersRef = collection(db, "users")
         const q = query(usersRef, where("username", "!=", username))
@@ -272,13 +285,15 @@ app.post('/api/users', async(req,res) => {
 
         querySnapshot.forEach((doc) => {
             users.push({
-                ...doc.data()
+                id: doc.id,
+                fullname: doc.data().fullname,
+                username: doc.data().username
             })
         })
 
         return res.status(200).json({
             success: true,
-            message: "Get all users succes.",
+            message: "Get all users success.",
             data: users
         })
 
@@ -293,19 +308,134 @@ app.post('/api/users', async(req,res) => {
 
 })
 
+//get req friends
+app.post('/api/user/friends/req', async(req,res) => {
+
+    try {
+
+        let user_id = req.body.user_id
+
+        if(!user_id)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "User id is required."
+            })
+        }
+        
+        const querySnapshot = await getDocs(collection(db, "users", user_id, "friend_requests"))
+
+        let friends_req = []
+
+        querySnapshot.forEach((doc) => {
+            friends_req.push({
+                id: doc.id,
+                fullname: doc.data().fullname,
+                username: doc.data().username,
+                user_id: doc.data().user_id
+            })
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Get friend requests success.",
+            data: friends_req
+        })
+        
+    } catch (error) {
+
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+
+})
+
 
 //add friend
-app.post('/api/user/friends', async(req,res) => {
+app.post('/api/user/friends/add', async(req,res) => {
 
     try {
 
         let user_id = req.body.user_id
         let friend_id = req.body.friend_id
-        let friend_fullname = req.body.friend_fullname
-        let friend_username = req.body.friend_username
+        let user_fullname = req.body.user_fullname
+        let user_username = req.body.user_username
+
+        if(!user_id || !friend_id || !user_fullname || !user_username)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "All field is required."
+            })
+        }
+
+        await addDoc(collection(db, "users", friend_id, "friend_requests"),{
+            user_id: user_id,
+            fullname: user_fullname,
+            username: user_username
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: "Add friend success.",
+        })
         
     } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
+    }
+
+})
+
+//acc friend
+app.post('/api/user/friends/acc', async(req,res) => {
+
+    try {
+
+        let user_id = req.body.user_id
+        let user_fullname = req.body.user_fullname
+        let user_username = req.body.user_username
+        let friend_id = req.body.friend_id
+        let friend_doc = req.body.friend_doc
+        let friend_fullname = req.body.friend_fullname
+        let friend_username = req.body.friend_username
+
+        if(!user_id || !friend_id || !friend_fullname || !friend_username || !user_fullname || !user_username || !friend_doc)
+        {
+            return res.status(401).json({
+                success: false,
+                message: "All field is required."
+            })
+        }
+
+        await addDoc(collection(db, "users", user_id, "friends"),{
+            user_id: friend_id,
+            fullname: friend_fullname,
+            username: friend_username
+        })
+
+        await addDoc(collection(db, "users", friend_id, "friends"),{
+            user_id: user_id,
+            fullname: user_fullname,
+            username: user_username
+        })
+
+        await deleteDoc(doc(db, "users", user_id, "friend_requests", friend_doc))
+
+        return res.status(200).json({
+            success: true,
+            message: "Acc friend success.",
+        })
         
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message,
+        })
     }
 
 })
