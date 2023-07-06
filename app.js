@@ -1,7 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-// import bcrypt from 'bcrypt'
 import { initializeApp } from "firebase/app"
 import { deleteDoc, getFirestore, collection, addDoc, query, where, getDocs, doc, limit, getDoc, updateDoc, QuerySnapshot } from "firebase/firestore"
 
@@ -56,8 +55,6 @@ app.post('/api/register', async(req, res) => {
                 message: "Username already registered.",
             })
         }
-
-        // let passwordHash = bcrypt.hashSync(password, 10)
 
         const docRef = await addDoc(usersRef, {
             fullname: fullname,
@@ -115,7 +112,6 @@ app.post('/api/login', async(req,res) => {
 
         querySnapshot.forEach((doc) => {
 
-            // bcrypt.compare(password, doc.data().password, (err, result) => {
             if(password != doc.data().password)
             {
                 return res.status(401).json({
@@ -352,7 +348,6 @@ app.post('/api/user/friends/req', async(req,res) => {
 
 })
 
-
 //add friend
 app.post('/api/user/friends/add', async(req,res) => {
 
@@ -437,7 +432,6 @@ app.post('/api/user/friends/acc', async(req,res) => {
             message: error.message,
         })
     }
-
 })
 
 app.listen(port, () => {
