@@ -1,0 +1,40 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100vh;
+}
+
+.wrapper {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.w-49 {
+    max-width: 49%;
+}
+
+@media only screen and (min-width: 768px) {
+
+    html, body {
+        background-color: #f1f1f1;
+    }
+
+    .login-form {
+        border-radius: 0.5rem;
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+    }
+
+    .wrapper {
+        position: relative;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+    
+}
