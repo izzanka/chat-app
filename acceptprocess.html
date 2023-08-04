@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      (async () => {
+        let url = new URL(window.location.href);
+        let user_id = url.searchParams.get("user_id");
+        let user_fullname = url.searchParams.get("user_fullname");
+        let user_username = url.searchParams.get("user_username");
+        let friend_id = url.searchParams.get("friend_id");
+        let friend_doc = url.searchParams.get("friend_doc");
+        let friend_fullname = url.searchParams.get("friend_fullname");
+        let friend_username = url.searchParams.get("friend_username");
+        try {
+          const res = await fetch(
+            "http://localhost:3000/api/user/friends/acc",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                user_id: user_id,
+                user_fullname: user_fullname,
+                user_username: user_username,
+                friend_id: friend_id,
+                friend_doc: friend_doc,
+                friend_fullname: friend_fullname,
+                friend_username: friend_username,
+              }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          window.location.href = "/chatapp/home";
+        } catch (err) {
+          alert("Something wrong. please try again later!");
+          console.log(err.message);
+          window.location.href = "/chatapp/home";
+        }
+      })();
+    </script>
+  </body>
+</html>
