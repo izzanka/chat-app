@@ -22,13 +22,7 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBNeZoO8FXUTrwyGqVdHWyZmhCzMslLWbk",
-  authDomain: "simple-chat-app-d0ab8.firebaseapp.com",
-  databaseURL: "https://simple-chat-app-d0ab8-default-rtdb.firebaseio.com",
-  projectId: "simple-chat-app-d0ab8",
-  storageBucket: "simple-chat-app-d0ab8.appspot.com",
-  messagingSenderId: "97021474830",
-  appId: "1:97021474830:web:c65e86ece40a2dd7dc645f",
+
 };
 
 const app = express();
