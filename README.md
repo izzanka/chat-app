@@ -3,7 +3,7 @@
 </p>
 
 ## About 
-Simple chat app.
+Simple realtime chat app.
 
 ## Built With
 
