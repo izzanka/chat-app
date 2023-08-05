@@ -3,7 +3,7 @@
 </p>
 
 ## About 
-Simple realtime chat app.
+Simple realtime chat app with firebase.
 
 ## Built With
 
@@ -18,5 +18,6 @@ Simple realtime chat app.
 * [expressjs/cors](https://github.com/expressjs/cors)
 * [firebase/firebase-admin-node](https://github.com/firebase/firebase-admin-node)
 * [kelektiv/node.bcrypt.js](https://github.com/kelektiv/node.bcrypt.js)
+* [jinder/path](https://github.com/jinder/path)
 
 ## Overview
